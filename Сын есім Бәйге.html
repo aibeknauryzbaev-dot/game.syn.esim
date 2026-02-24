@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сын есім - Бәйге Ойыны</title>
+    <!-- Tailwind CSS (сыртқы дизайн үшін, бірақ интернетсіз жұмыс істеуі үшін негізгі стильдер де ішіне жазылған) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap');
+        
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f0fdf4; /* Ашық жасыл фон */
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        .track-bg {
+            background-color: #d1fae5;
+            background-image: linear-gradient(90deg, transparent 50%, rgba(255,255,255,.5) 50%);
+            background-size: 50px 50px;
+        }
+
+        .horse {
+            transition: left 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%) scaleX(-1); /* Атты оңға қаратып бұру үшін scaleX(-1) қосылды */
+            font-size: 3rem;
+            z-index: 10;
+        }
+
+        .finish-line {
+            position: absolute;
+            right: 5%;
+            top: 0;
+            bottom: 0;
+            width: 15px;
+            background: repeating-linear-gradient(
+                0deg,
+                #000,
+                #000 10px,
+                #fff 10px,
+                #fff 20px
+            );
+            z-index: 5;
+            border-left: 2px solid red;
+        }
+
+        .btn-option {
+            transition: all 0.1s;
+        }
+        
+        .btn-option:active {
+            transform: scale(0.95);
+        }
+
+        /* Қате жауап бергендегі анимация */
+        .shake-red {
+            animation: shake 0.4s;
+            background-color: #ef4444 !important; /* Қызыл түс */
+            color: white !important;
+            pointer-events: none;
+        }
+
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-between py-4">
+
+    <!-- Тақырып -->
+    <header class="text-center w-full flex-shrink-0">
+        <h1 class="text-4xl font-black text-green-700 uppercase tracking-wider drop-shadow-md">Сын есім - Бәйге 🐎</h1>
+        <p class="text-gray-600 font-bold mt-2">Бірінші болып 10 сұраққа дұрыс жауап берген ойыншы жеңеді!</p>
+    </header>
+
+    <!-- Жарыс жолы -->
+    <div class="w-full max-w-5xl flex-shrink-0 bg-white rounded-xl shadow-lg border-4 border-green-600 overflow-hidden relative mt-4">
+        
+        <!-- Мәре сызығы -->
+        <div class="finish-line"></div>
+
+        <!-- Ойыншы 1 Жолы -->
+        <div class="relative w-full h-24 track-bg border-b-4 border-green-700 border-dashed">
+            <div id="p1-track-name" class="absolute left-2 top-2 text-sm font-bold text-blue-700 bg-white px-2 rounded shadow">Ойыншы 1</div>
+            <div id="horse1" class="horse" style="left: 2%;">🏇</div>
+        </div>
+
+        <!-- Ойыншы 2 Жолы -->
+        <div class="relative w-full h-24 track-bg">
+            <div id="p2-track-name" class="absolute left-2 top-2 text-sm font-bold text-red-700 bg-white px-2 rounded shadow">Ойыншы 2</div>
+            <div id="horse2" class="horse" style="left: 2%;">🏇</div>
+        </div>
+    </div>
+
+    <!-- Сұрақ панелі -->
+    <div class="w-full max-w-4xl flex-shrink-0 bg-yellow-100 border-4 border-yellow-400 rounded-2xl p-6 text-center shadow-xl mt-4 relative min-h-[120px] flex items-center justify-center">
+        <h2 id="questionText" class="text-2xl md:text-3xl font-bold text-gray-800">Ойынды бастау үшін "Бастау" түймесін басыңыз</h2>
+        
+        <!-- Ойынды бастау / Қайта бастау қабаты -->
+        <div id="startOverlay" class="absolute inset-0 bg-white/95 rounded-xl flex flex-col items-center justify-center z-20 space-y-4">
+            <h3 class="text-xl font-bold text-gray-700 mb-2">Ойыншылардың аттарын жазыңыз:</h3>
+            <div class="flex gap-4 mb-2">
+                <input type="text" id="p1NameInput" placeholder="1-ші ойыншы аты" class="border-2 border-blue-400 rounded-lg px-4 py-2 text-center font-bold text-blue-700 outline-none focus:ring-2 focus:ring-blue-500 w-40 md:w-48">
+                <input type="text" id="p2NameInput" placeholder="2-ші ойыншы аты" class="border-2 border-red-400 rounded-lg px-4 py-2 text-center font-bold text-red-700 outline-none focus:ring-2 focus:ring-red-500 w-40 md:w-48">
+            </div>
+            <button onclick="startGame()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-10 rounded-full text-xl shadow-lg transform transition hover:scale-105">
+                Ойынды Бастау
+            </button>
+        </div>
+    </div>
+
+    <!-- Ойыншылардың жауап панелдері -->
+    <div class="w-full flex max-w-6xl gap-4 px-4 mt-4 h-full pb-4">
+        
+        <!-- Ойыншы 1 (Көк) -->
+        <div class="flex-1 bg-blue-50 border-4 border-blue-400 rounded-2xl p-4 flex flex-col">
+            <h3 class="text-center font-bold text-blue-700 text-xl mb-4"><span id="p1-panel-name">Ойыншы 1</span> <br><span class="text-sm font-normal">(Пернелер: 1, 2, 3, 4)</span></h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 flex-1" id="p1-buttons">
+                <!-- Батырмалар JS арқылы қосылады -->
+            </div>
+        </div>
+
+        <!-- Ойыншы 2 (Қызыл) -->
+        <div class="flex-1 bg-red-50 border-4 border-red-400 rounded-2xl p-4 flex flex-col">
+            <h3 class="text-center font-bold text-red-700 text-xl mb-4"><span id="p2-panel-name">Ойыншы 2</span> <br><span class="text-sm font-normal">(Пернелер: 7, 8, 9, 0)</span></h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 flex-1" id="p2-buttons">
+                <!-- Батырмалар JS арқылы қосылады -->
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Жеңімпазды хабарлау модальді терезесі -->
+    <div id="winnerModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50">
+        <div class="bg-white p-10 rounded-3xl text-center max-w-lg w-full transform scale-110 shadow-2xl">
+            <h1 class="text-6xl mb-4">🏆</h1>
+            <h2 id="winnerText" class="text-4xl font-black text-gray-800 mb-6">Ойыншы 1 Жеңді!</h2>
+            <button onclick="startGame()" class="bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600 text-white font-bold py-3 px-8 rounded-full text-xl shadow-md w-full">
+                Қайта ойнау
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Сын есімге байланысты сұрақтар базасы (Бастауыш сыныпқа арналған)
+        const questionBank = [
+            { q: "Сын есім қандай сұрақтарға жауап береді?", options: ["Қандай? Қай?", "Кім? Не?", "Не істеді?", "Қанша? Неше?"] },
+            { q: "Заттың түсін білдіретін сөзді тап:", options: ["Қызыл", "Алма", "Жеді", "Оқушы"] },
+            { q: "Заттың дәмін білдіретін сөзді тап:", options: ["Тәтті", "Қалам", "Секірді", "Қала"] },
+            { q: "«Үлкен» сөзіне қарама-қарсы (антоним) сөзді тап:", options: ["Кішкентай", "Биік", "Ақылды", "Жақсы"] },
+            { q: "«Әдемі» сөзінің синонимін (мәндес сөзін) тап:", options: ["Сұлу", "Жаман", "Ұзын", "Толық"] },
+            { q: "Төмендегі сөздерден сын есімді тап:", options: ["Жұмсақ", "Терезе", "Ойнады", "Мектеп"] },
+            { q: "Сын есім нені білдіреді?", options: ["Заттың сынын, сапасын", "Заттың атын", "Заттың қимылын", "Заттың санын"] },
+            { q: "Қай қатарда тек сын есімдер жазылған?", options: ["Сары, биік, суық", "Бала, қыз, ата", "Оқыды, жазды, күлді", "Бір, екі, үш"] },
+            { q: "«Ақылды бала» тіркесіндегі сын есім қайсы?", options: ["Ақылды", "Бала", "Екеуі де сын есім", "Сын есім жоқ"] },
+            { q: "Заттың пішінін білдіретін сөзді тап:", options: ["Дөңгелек", "Ащы", "Тез", "Суық"] },
+            { q: "«Ұзын» сөзіне қарама-қарсы сөз қандай?", options: ["Қысқа", "Биік", "Үлкен", "Жіңішке"] },
+            { q: "«Тәтті алма» тіркесіндегі сын есім қандай сұраққа жауап береді?", options: ["Қандай?", "Не?", "Кім?", "Не істеді?"] },
+            { q: "«Қараңғы» сөзіне қарама-қарсы сөзді белгіле:", options: ["Жарық", "Түн", "Жақсы", "Қара"] },
+            { q: "Ауа райына қатысты сын есімді тап:", options: ["Салқын", "Доп", "Биледі", "Бес"] },
+            { q: "Сөйлемнен сын есімді тап: «Күзде сары жапырақтар түседі.»", options: ["Сары", "Күзде", "Жапырақтар", "Түседі"] },
+            { q: "Салмақты білдіретін сын есімді тап:", options: ["Ауыр", "Жасыл", "Дәмді", "Төртбұрыш"] },
+            { q: "Адамның мінезін білдіретін сын есімді тап:", options: ["Еңбекқор", "Дөңгелек", "Қышқыл", "Ыстық"] },
+            { q: "Қай сөз сын есім емес?", options: ["Кітап", "Жарық", "Таза", "Терең"] },
+            { q: "«Қалың» сөзінің антонимін тап:", options: ["Жұқа", "Жуан", "Биік", "Аласа"] },
+            { q: "Сөйлемді толықтыр: «Қоянның құлағы ...»", options: ["Ұзын", "Қысқа", "Дөңгелек", "Жасыл"] }
+        ];
+
+        let currentQuestions = [];
+        let activeQuestion = null;
+        let p1Score = 0;
+        let p2Score = 0;
+        const maxScore = 10;
+        let isPlaying = false;
+        let p1Name = "Ойыншы 1";
+        let p2Name = "Ойыншы 2";
+
+        // Ойыншылардың бұғатталу күйі (қате жауап бергенде)
+        let p1Locked = false;
+        let p2Locked = false;
+
+        // DOM Элементтері
+        const questionText = document.getElementById('questionText');
+        const p1ButtonsContainer = document.getElementById('p1-buttons');
+        const p2ButtonsContainer = document.getElementById('p2-buttons');
+        const horse1 = document.getElementById('horse1');
+        const horse2 = document.getElementById('horse2');
+        const startOverlay = document.getElementById('startOverlay');
+        const winnerModal = document.getElementById('winnerModal');
+        const winnerText = document.getElementById('winnerText');
+
+        // Массивті араластыру функциясы (Кездейсоқ ретпен қою)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Ойынды бастау
+        function startGame() {
+            // Ойыншылардың аттарын оқу
+            const p1Input = document.getElementById('p1NameInput').value.trim();
+            const p2Input = document.getElementById('p2NameInput').value.trim();
+            p1Name = p1Input !== "" ? p1Input : "Ойыншы 1";
+            p2Name = p2Input !== "" ? p2Input : "Ойыншы 2";
+
+            // Аттарды экранға шығару
+            document.getElementById('p1-track-name').textContent = p1Name;
+            document.getElementById('p2-track-name').textContent = p2Name;
+            document.getElementById('p1-panel-name').textContent = p1Name;
+            document.getElementById('p2-panel-name').textContent = p2Name;
+
+            p1Score = 0;
+            p2Score = 0;
+            updateHorses();
+            isPlaying = true;
+            p1Locked = false;
+            p2Locked = false;
+
+            startOverlay.classList.add('hidden');
+            winnerModal.classList.remove('flex');
+            winnerModal.classList.add('hidden');
+
+            // Сұрақтарды көшіріп алып, араластырамыз
+            currentQuestions = shuffleArray([...questionBank]);
+            
+            loadNextQuestion();
+        }
+
+        // Келесі сұрақты жүктеу
+        function loadNextQuestion() {
+            if (p1Score >= maxScore || p2Score >= maxScore) {
+                endGame();
+                return;
+            }
+
+            if (currentQuestions.length === 0) {
+                // Сұрақ таусылса, қайтадан толтырамыз
+                currentQuestions = shuffleArray([...questionBank]);
+            }
+
+            const qData = currentQuestions.pop();
+            
+            // Жауаптарды араластырамыз (дұрыс жауап әрқашан 0-индексте тұр, соны сақтап қалу үшін объект жасаймыз)
+            let answers = qData.options.map((text, index) => ({
+                text: text,
+                isCorrect: index === 0
+            }));
+            answers = shuffleArray(answers);
+
+            activeQuestion = {
+                question: qData.q,
+                answers: answers
+            };
+
+            questionText.textContent = activeQuestion.question;
+            renderButtons();
+        }
+
+        // Батырмаларды экранға шығару
+        function renderButtons() {
+            p1ButtonsContainer.innerHTML = '';
+            p2ButtonsContainer.innerHTML = '';
+
+            const p1Keys = ['1', '2', '3', '4'];
+            const p2Keys = ['7', '8', '9', '0'];
+
+            activeQuestion.answers.forEach((ans, index) => {
+                // Ойыншы 1 батырмалары
+                const btn1 = document.createElement('button');
+                btn1.className = `btn-option bg-white border-2 border-blue-300 hover:bg-blue-100 text-blue-900 font-bold py-3 px-2 rounded-xl text-sm md:text-base shadow-sm relative overflow-hidden`;
+                btn1.innerHTML = `<span class="absolute top-1 left-2 text-xs text-blue-400 opacity-70">[${p1Keys[index]}]</span> <span class="block mt-2">${ans.text}</span>`;
+                btn1.onclick = () => handleAnswer(1, index, btn1);
+                btn1.id = `p1-btn-${index}`;
+                p1ButtonsContainer.appendChild(btn1);
+
+                // Ойыншы 2 батырмалары
+                const btn2 = document.createElement('button');
+                btn2.className = `btn-option bg-white border-2 border-red-300 hover:bg-red-100 text-red-900 font-bold py-3 px-2 rounded-xl text-sm md:text-base shadow-sm relative overflow-hidden`;
+                btn2.innerHTML = `<span class="absolute top-1 left-2 text-xs text-red-400 opacity-70">[${p2Keys[index]}]</span> <span class="block mt-2">${ans.text}</span>`;
+                btn2.onclick = () => handleAnswer(2, index, btn2);
+                btn2.id = `p2-btn-${index}`;
+                p2ButtonsContainer.appendChild(btn2);
+            });
+        }
+
+        // Жауапты тексеру
+        function handleAnswer(player, index, btnElement) {
+            if (!isPlaying) return;
+            if (player === 1 && p1Locked) return;
+            if (player === 2 && p2Locked) return;
+
+            const isCorrect = activeQuestion.answers[index].isCorrect;
+
+            if (isCorrect) {
+                // Дұрыс жауап!
+                if (player === 1) p1Score++;
+                if (player === 2) p2Score++;
+                
+                updateHorses();
+                
+                // Егер біреу жеңсе
+                if (p1Score >= maxScore || p2Score >= maxScore) {
+                    endGame(player);
+                } else {
+                    // Келесі сұраққа өту
+                    loadNextQuestion();
+                }
+            } else {
+                // Қате жауап! Ойыншыны бұғаттау
+                lockPlayer(player, btnElement);
+            }
+        }
+
+        // Қате жауап берген ойыншыны 1 секундқа бұғаттау
+        function lockPlayer(player, btnElement) {
+            btnElement.classList.add('shake-red');
+            
+            if (player === 1) {
+                p1Locked = true;
+                setTimeout(() => {
+                    p1Locked = false;
+                    if(btnElement) btnElement.classList.remove('shake-red');
+                }, 1000);
+            } else {
+                p2Locked = true;
+                setTimeout(() => {
+                    p2Locked = false;
+                    if(btnElement) btnElement.classList.remove('shake-red');
+                }, 1000);
+            }
+        }
+
+        // Аттардың орнын жаңарту (90% - бұл мәре сызығы)
+        function updateHorses() {
+            // 1 қадам = 9% ұзындық (10 қадам = 90%)
+            horse1.style.left = `calc(2% + ${p1Score * 8.8}%)`; 
+            horse2.style.left = `calc(2% + ${p2Score * 8.8}%)`;
+        }
+
+        // Ойынды аяқтау
+        function endGame(winnerPlayer) {
+            isPlaying = false;
+            winnerModal.classList.remove('hidden');
+            winnerModal.classList.add('flex');
+            
+            if (p1Score >= maxScore && p2Score >= maxScore) {
+                winnerText.textContent = "Тең түстіңіздер! 🤝";
+                winnerText.className = "text-4xl font-black text-gray-800 mb-6";
+            } else if (winnerPlayer === 1 || p1Score >= maxScore) {
+                winnerText.textContent = `${p1Name} Жеңді! 🥇`;
+                winnerText.className = "text-4xl font-black text-blue-600 mb-6";
+            } else {
+                winnerText.textContent = `${p2Name} Жеңді! 🥇`;
+                winnerText.className = "text-4xl font-black text-red-600 mb-6";
+            }
+        }
+
+        // Клавиатурамен басқару
+        document.addEventListener('keydown', (e) => {
+            if (!isPlaying) return;
+
+            const key = e.key;
+            
+            // Ойыншы 1 пернелері (1, 2, 3, 4)
+            if (['1', '2', '3', '4'].includes(key)) {
+                const index = parseInt(key) - 1;
+                const btn = document.getElementById(`p1-btn-${index}`);
+                if(btn) handleAnswer(1, index, btn);
+            }
+            
+            // Ойыншы 2 пернелері (7, 8, 9, 0)
+            if (['7', '8', '9', '0'].includes(key)) {
+                let index;
+                if (key === '7') index = 0;
+                if (key === '8') index = 1;
+                if (key === '9') index = 2;
+                if (key === '0') index = 3;
+                
+                const btn = document.getElementById(`p2-btn-${index}`);
+                if(btn) handleAnswer(2, index, btn);
+            }
+        });
+
+    </script>
+</body>
+</html>
